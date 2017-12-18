@@ -1,0 +1,10 @@
+build/*.js
+config/*.js
+src/common/zoomerang.js
+src/common/exif.js
+src/common/core.js
+src/common/photoswipe.js
+src/common/photoswipe-ui-default.js
+src/common/echarts.min.js
+src/components/base/mapView.vue
+src/components/base/swiper/*
