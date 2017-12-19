@@ -1,7 +1,8 @@
 <template>
   <div class="searchMap">
     <div class="keywordDiv">
-      <form @submit="keywordSubmit">
+      <img class="backBtn" src="../static/img/icon-back.png"/>
+      <form @submit="keywordSubmit" class="searchKeywordDiv">
         <input type="text"
                class="searchKeyword"
                ref="searchKeyword"
@@ -10,13 +11,15 @@
                @focus="isAutoResultDivHide = false; isResultDivHide = true;"
                v-model="searchKeyword"/>
       </form>
-      <div class="autoResultDiv" :class="{'hide': isAutoResultDivHide}">
-        <mg-auto-search-result-cell v-for="item, index in autoSearchResult"
-                                 :key="index"
-                                 :item="item"
-                                 @click="autoResultClick"
-        ></mg-auto-search-result-cell>
-      </div>
+      <img class="clearSearch" src="../static/img/icon-back.png"/>
+      <span class="cancelSearch">取消</span>
+    </div>
+    <div class="autoResultDiv" :class="{'hide': isAutoResultDivHide}">
+      <mg-auto-search-result-cell v-for="item, index in autoSearchResult"
+                                  :key="index"
+                                  :item="item"
+                                  @click="autoResultClick"
+      ></mg-auto-search-result-cell>
     </div>
     <mg-scroll-div class="resultDiv" :class="{'resultDivHide': isResultDivHide}" @willScrollToBottom="loadMoreResult">
       <mg-search-result-cell  v-for="item, index in searchResult"
@@ -79,6 +82,20 @@
       });
     },
     methods: {
+      getFormattedAddressByResult (result) {
+        let address = result.addressComponent.province + result.addressComponent.city + result.addressComponent.district;
+        let detailAddress = '';
+        if (result.addressComponent.street === '') {
+          detailAddress = result.addressComponent.township;
+        } else {
+          detailAddress = result.addressComponent.street + result.addressComponent.streetNumber + result.addressComponent.building;
+        }
+        return {
+          adcode: result.addressComponent.adcode,
+          address: address,
+          detailAddress: detailAddress,
+        }
+      },
       initMap () {
         this.autocomplete = new AMap.Autocomplete({
           city: this.city
@@ -115,7 +132,8 @@
         this.map.addControl(this.geolocation);
         this.geolocation.getCurrentPosition();
         AMap.event.addListener(this.geolocation, 'complete', (result) => {
-          this.createMarker(result.position, result.formattedAddress);
+          let addressMap = this.getFormattedAddressByResult(result);
+          this.createMarker(result.position, addressMap.address + addressMap.detailAddress);
         }); // 返回定位信息
         AMap.event.addListener(this.geolocation, 'error', (err) => {
           console.log('定位失败');
@@ -201,7 +219,8 @@
         this.geocoder.getAddress(position, (status, result) => {
           let title = '';
           if (status === 'complete' && result.info === 'OK') {
-            title = result.regeocode.formattedAddress;
+            let addressMap = this.getFormattedAddressByResult(result.regeocode);
+            title = addressMap.address + addressMap.detailAddress;
           } else {
             title = '未知地址';
           }
@@ -278,18 +297,48 @@
     top: 20px
     left: 0
     right: 0
-    height: 30px
-    padding: 0 15px
+    height: 48px
+    margin: 0 12px
     z-index: 200
-    .searchKeyword
-      width: 100%
-      height: 30px
+    display: flex
+    align-items: center
+    background-color: #ffffff
+    box-shadow: 0 2px 4px 0 #cccccc
+  .backBtn
+      height: 20px
+      width: 20px
+      margin: 0 5px
+    .clearSearch
+      height: 14px
+      width: 14px
+      margin: 0 5px
+    .cancelSearch
+      font-size: 16px
       line-height: 16px
-      padding: 7px 5px
+      color: #646464
+      display: inline-block
+      padding: 0 10px
+      margin-right: 3px
+      border-left: 1px solid #cccccc
+    .searchKeywordDiv
+      flex: 1
+      .searchKeyword
+        width: 100%
+        height: 48px
+        line-height: 22px
+        padding: 13px 5px
+        border: none
+        outline: none
+
     .autoResultDiv
       background-color: #ffffff
-      max-height: 200px
+      max-height: 300px
       overflow: auto
+      z-index: 200
+      position: absolute
+      left: 12px
+      right: 12px
+      top: 75px
 
   .resultDiv
     position: absolute
@@ -298,7 +347,7 @@
     max-height: 200px
     bottom: 0
     padding: 0 15px
-    z-index: 200
+    z-index: 10000
     background-color: #ffffff
     overflow: auto
     transition: all 0.15s

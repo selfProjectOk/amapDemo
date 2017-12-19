@@ -6,8 +6,7 @@ import searchMap from '@/components/searchMap'
 Vue.use(Router)
 export default new Router({
   routes: [
-    { path: '/home', redirect: '/' },
-    { path: '/', component: home },
-    { path: '/searchMap', component: searchMap },
+    { path: '/home', component: home },
+    { path: '/', component: searchMap },
   ]
 })

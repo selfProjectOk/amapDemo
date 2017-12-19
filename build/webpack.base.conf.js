@@ -13,6 +13,7 @@ module.exports = {
   },
   externals: {
     "AMap": "AMap",
+    "AMapUI": "AMapUI",
   },
   output: {
     path: config.build.assetsRoot,
