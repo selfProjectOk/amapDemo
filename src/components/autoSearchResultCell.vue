@@ -7,7 +7,7 @@
       </div>
       <div class="second">
         <p class="name" v-text="item.name"></p>
-        <p class="position" v-text="item.address"></p>
+        <p class="position" v-text="getAddress(item.address)"></p>
       </div>
     </div>
   </div>
@@ -25,9 +25,14 @@
       }
     },
     mounted () {
-      console.log(this.item);
     },
     methods: {
+      getAddress (address) {
+        if (typeof address !== 'string') {
+          return '';
+        }
+        return address;
+      }
     }
   }
 </script>

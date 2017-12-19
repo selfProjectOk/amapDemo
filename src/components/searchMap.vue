@@ -1,7 +1,7 @@
 <template>
   <div class="searchMap">
     <div class="mapNavBar" v-show="pageType === 'show'">
-      <img class="backBtn" src="../static/img/icon-back.png"/>
+      <img class="backBtn" @click="back" src="../static/img/icon-back.png"/>
       <div style="height: 16px; width: 1px; background-color: #cccccc;"></div>
       <p class="showKeyword" v-show="showSearchKeyword !== ''" v-text="showSearchKeyword" @click="goSearch"></p>
       <p class="showKeyword" v-show="showSearchKeyword === ''" v-text="'输入详细地址'" style="color: #bbbbbb" @click="goSearch"></p>
@@ -97,6 +97,9 @@
       });
     },
     methods: {
+      back () {
+        this.$router.go(-1);
+      },
       // 自定义导航栏元素事件
       goSearch () {
         this.pageType = 'search';

@@ -1,7 +1,7 @@
 <template>
   <div class="searchMap">
     <div class="mapSearchNavBar">
-      <img class="backBtn" src="../static/img/icon-back.png"/>
+      <img class="backBtn" @click="back" src="../static/img/icon-back.png"/>
       <form @submit="keywordSubmit" class="searchKeywordDiv" action="javascript:void(0)">
         <input type="text"
                class="searchKeyword"
@@ -93,6 +93,9 @@
       this.positionPicker.stop();
     },
     methods: {
+      back () {
+        this.$router.go(-1);
+      },
       // 自定义导航栏元素事件
       startSearch () {
         this.keywordSubmit();
