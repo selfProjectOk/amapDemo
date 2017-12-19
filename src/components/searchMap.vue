@@ -1,27 +1,39 @@
 <template>
   <div class="searchMap">
-    <div class="keywordDiv">
+    <div class="mapNavBar" v-show="pageType === 'show'">
       <img class="backBtn" src="../static/img/icon-back.png"/>
-      <form @submit="keywordSubmit" class="searchKeywordDiv">
+      <div style="height: 16px; width: 1px; background-color: #cccccc;"></div>
+      <p class="showKeyword" v-show="showSearchKeyword !== ''" v-text="showSearchKeyword" @click="goSearch"></p>
+      <p class="showKeyword" v-show="showSearchKeyword === ''" v-text="'输入详细地址'" style="color: #bbbbbb" @click="goSearch"></p>
+    </div>
+    <div class="mapSearchNavBar" v-show="pageType === 'search'">
+      <img class="searchIcon" src="../static/img/icon-search.png"/>
+      <form @submit="keywordSubmit" class="searchKeywordDiv" action="javascript:void(0)">
         <input type="text"
                class="searchKeyword"
                ref="searchKeyword"
+               maxlength="12"
                @input="keywordInput"
                @blur="isAutoResultDivHide = true"
                @focus="isAutoResultDivHide = false; isResultDivHide = true;"
                v-model="searchKeyword"/>
       </form>
-      <img class="clearSearch" src="../static/img/icon-back.png"/>
-      <span class="cancelSearch">取消</span>
+      <img class="clearSearch" @click="clearSearch" src="../static/img/image_delete.png"/>
+      <span class="cancelSearch" @click="cancelSearch">取消</span>
     </div>
     <div class="autoResultDiv" :class="{'hide': isAutoResultDivHide}">
+      <div class="autoResultDivTitle">
+        <p>建议</p>
+      </div>
       <mg-auto-search-result-cell v-for="item, index in autoSearchResult"
                                   :key="index"
                                   :item="item"
                                   @click="autoResultClick"
       ></mg-auto-search-result-cell>
     </div>
-    <mg-scroll-div class="resultDiv" :class="{'resultDivHide': isResultDivHide}" @willScrollToBottom="loadMoreResult">
+    <mg-scroll-div class="resultDiv"
+                   :class="{'resultDivHide': isResultDivHide}"
+                   @willScrollToBottom="loadMoreResult">
       <mg-search-result-cell  v-for="item, index in searchResult"
                               :key="index"
                               :item="item"
@@ -45,6 +57,7 @@
     },
     data () {
       return {
+        pageType: 'show',
         map: null,
         autocomplete: null,
         placeSearch: null,
@@ -57,7 +70,9 @@
         isAutoResultDivHide: true,
         isResultDivHide: true,
 
+        showSearchKeyword: '',
         searchKeyword: '',
+
         autoSearchResult: [],
         searchResult: [],
         city: '上海',
@@ -82,6 +97,57 @@
       });
     },
     methods: {
+      // 自定义导航栏元素事件
+      goSearch () {
+        this.pageType = 'search';
+        this.searchKeyword = this.showSearchKeyword;
+        this.$nextTick(() => {
+          this.$refs.searchKeyword.focus();
+        })
+      },
+      cancelSearch () {
+        this.pageType = 'show';
+      },
+      clearSearch () {
+        this.searchKeyword = '';
+        this.keywordInput();
+        this.$nextTick(() => {
+          this.$refs.searchKeyword.focus();
+        })
+      },
+      keywordInput () {
+        if (this.autocomplete) {
+          this.autocomplete.search(this.searchKeyword, (status, result) => {
+            console.log(result);
+            if (status === 'complete') {
+              this.autoSearchResult = result.tips;
+            } else {
+              this.autoSearchResult = [];
+            }
+          });
+        }
+      },
+      keywordSubmit () {
+        this.$refs.searchKeyword.blur();
+        this.pageType = 'show';
+        this.showSearchKeyword = this.searchKeyword;
+
+        if (this.placeSearch) {
+          this.searchResult = [];
+          this.searchItem = null;
+          this.currentPage = 1;
+          this.hasNext = true;
+          this.loadSearchResult();
+        }
+      },
+
+      // 联想搜索cell点击
+      autoResultClick (item) {
+        this.searchKeyword = item.name;
+        this.keywordSubmit();
+      },
+
+      // aMap事件
       getFormattedAddressByResult (result) {
         let address = result.addressComponent.province + result.addressComponent.city + result.addressComponent.district;
         let detailAddress = '';
@@ -144,37 +210,6 @@
         this.$refs.searchKeyword.blur();
         this.isResultDivHide = true;
         this.getAddressWithGeocoder(e.lnglat);
-      },
-      keywordInput () {
-        if (this.autocomplete) {
-          this.autocomplete.search(this.searchKeyword, (status, result) => {
-            if (status === 'complete') {
-              this.autoSearchResult = result.tips;
-            } else {
-              this.autoSearchResult = [];
-            }
-          });
-        }
-      },
-      keywordSubmit () {
-        this.$refs.searchKeyword.blur();
-        if (this.placeSearch) {
-          this.searchResult = [];
-          this.searchItem = null;
-          this.currentPage = 1;
-          this.hasNext = true;
-          this.loadSearchResult();
-        }
-      },
-      autoResultClick (item) {
-        this.searchKeyword = item.name;
-        if (this.placeSearch) {
-          this.searchResult = [];
-          this.searchItem = item;
-          this.currentPage = 1;
-          this.hasNext = true;
-          this.loadSearchResult();
-        }
       },
       loadMoreResult () {
         if (this.placeSearch && this.hasNext) {
@@ -292,7 +327,7 @@
     right: 0
     bottom: 0
 
-  .keywordDiv
+  .mapSearchNavBar, .mapNavBar
     position: absolute
     top: 20px
     left: 0
@@ -304,14 +339,15 @@
     align-items: center
     background-color: #ffffff
     box-shadow: 0 2px 4px 0 #cccccc
-  .backBtn
+
+    .backBtn, .searchIcon
       height: 20px
       width: 20px
-      margin: 0 5px
+      margin: 0 10px
     .clearSearch
       height: 14px
       width: 14px
-      margin: 0 5px
+      margin: 0 10px 0 5px
     .cancelSearch
       font-size: 16px
       line-height: 16px
@@ -320,25 +356,47 @@
       padding: 0 10px
       margin-right: 3px
       border-left: 1px solid #cccccc
+    .showKeyword
+      flex: 1
+      padding: 0 10px
+      font-size: 16px
+      color: #323232
+      line-height: 40px
+      height: 40px
+      text-align: left
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
+
     .searchKeywordDiv
       flex: 1
       .searchKeyword
+        font-size: 16px
+        color: #323232
         width: 100%
         height: 48px
         line-height: 22px
-        padding: 13px 5px
+        padding: 13px 0
         border: none
         outline: none
 
-    .autoResultDiv
-      background-color: #ffffff
-      max-height: 300px
-      overflow: auto
-      z-index: 200
-      position: absolute
-      left: 12px
-      right: 12px
-      top: 75px
+
+
+  .autoResultDiv
+    background-color: #ffffff
+    max-height: 300px
+    overflow: auto
+    z-index: 200
+    position: absolute
+    left: 12px
+    right: 12px
+    top: 75px
+    .autoResultDivTitle
+      line-height: 50px
+      font-size: 14px
+      color: #909090
+      text-align: left
+      margin-left: 10px
 
   .resultDiv
     position: absolute

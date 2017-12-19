@@ -43,4 +43,5 @@
 <style lang="stylus" scoped>
   .scrollDiv
     overflow: auto
+    -webkit-overflow-scrolling: touch
 </style>

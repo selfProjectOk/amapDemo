@@ -1,8 +1,15 @@
 <template>
   <div class="autoSearchResultCell" @click="$emit('click', item)">
-    <p v-text="item.name"></p>
-    <p v-text="item.district + item.address"></p>
-    <br/>
+    <div class="xLine"></div>
+    <div class="cell">
+      <div class="first">
+        <img src="../static/img/icon_location.png"/>
+      </div>
+      <div class="second">
+        <p class="name" v-text="item.name"></p>
+        <p class="position" v-text="item.address"></p>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -18,6 +25,7 @@
       }
     },
     mounted () {
+      console.log(this.item);
     },
     methods: {
     }
@@ -27,4 +35,35 @@
 <style lang="stylus" scoped>
   .autoSearchResultCell
     text-align: left
+  .cell
+    display: flex
+    align-items: center
+    padding: 0 10px
+    .first
+      img
+        height: 16px
+        width: 16px
+
+    .second
+      flex: 1
+      text-align: left
+      padding: 5px 10px
+      .name
+        font-size: 12px
+        color: #323232
+        display: flex
+        align-items: center
+      .position
+        font-size: 10px
+        color: #646464
+
+
+  .xLine
+    border-bottom: 1px solid #e4e4e4
+    margin-left: 36px
+    height: 1px
+    transform: scaleY(0.5)
+    transform-origin: 0 0
+    -webkit-transform: scaleY(0.5)
+    -webkit-transform-origin: 0 0
 </style>
