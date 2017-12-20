@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <router-view></router-view>
+    <div id="picker"></div>
   </div>
 </template>
 

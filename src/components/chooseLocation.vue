@@ -189,6 +189,7 @@
       mapClick (e) {
         this.$refs.searchKeyword.blur();
         this.isResultDivHide = true;
+        this.map.setCenter(e.lnglat);
       },
       loadMoreResult () {
         if (this.placeSearch && this.hasNext) {
