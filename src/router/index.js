@@ -8,9 +8,9 @@ import findLandlord from '@/components/findLandlord'
 Vue.use(Router)
 export default new Router({
   routes: [
-    { path: '/home', component: home },
+    { path: '/', component: home },
     { path: '/chooseLocation', name: 'chooseLocation', component: chooseLocation },
     { path: '/searchMap', name: 'searchMap', component: searchMap },
-    { path: '/', name: 'findLandlord', component: findLandlord },
+    { path: '/findLandlord', name: 'findLandlord', component: findLandlord },
   ]
 })

@@ -15,7 +15,7 @@
       <span class="cancelSearch" @click="startSearch" v-show="searchKeyword !== ''">搜索</span>
     </div>
     <mg-scroll-div class="resultDiv"
-                   :class="{'hide': isResultDivHide}"
+                   :class="{'resultDivHide': isResultDivHide}"
                    @willScrollToBottom="loadMoreResult">
       <div class="resultDivTitle">
         <p>建议</p>
@@ -29,7 +29,9 @@
         <p>无更多数据</p>
       </div>
     </mg-scroll-div>
-    <div class="bottomResultDiv" v-show="chooseAddressMap.position">
+    <div class="bottomResultDiv"
+         :class="{'bottomResultDivHide': !isResultDivHide}"
+         v-show="chooseAddressMap.position">
       <div class="bottomResult">
         <p class="resultName" v-text="chooseAddressMap.name"></p>
         <p class="resultAddress" v-text="chooseAddressMap.address"></p>
@@ -136,7 +138,6 @@
             lng: positionResult.position.lng,
           };
           this.setChooseAddressMap(addressMap);
-          console.log(positionResult);
         });
         this.positionPicker.start();
       },
@@ -175,6 +176,8 @@
         this.map.addControl(this.geolocation);
         this.geolocation.getCurrentPosition();
         AMap.event.addListener(this.geolocation, 'complete', (result) => {
+          this.$refs.searchKeyword.blur();
+          this.isResultDivHide = true;
           this.map.setCenter(result.position);
           this.map.setZoom(17);
         }); // 返回定位信息
@@ -205,7 +208,6 @@
         this.placeSearch.setCity(item.adcode);
         this.placeSearch.search(item.name, (status, result) => {
           if (status === 'complete') {
-            console.log(result)
             this.searchResult = this.searchResult.concat(result.poiList.pois);
             this.currentPage = result.poiList.pageIndex + 1;
             this.hasNext = result.poiList.count > (result.poiList.pageIndex * result.poiList.pageSize);
@@ -252,6 +254,7 @@
     left: 0
     right: 0
     bottom: 0
+    overflow: hidden
   #searchMapDiv
     position: absolute
     top: 0
@@ -266,7 +269,7 @@
     right: 0
     height: 48px
     margin: 0 12px
-    z-index: 200
+    z-index: 201
     display: flex
     align-items: center
     background-color: #ffffff
@@ -316,13 +319,14 @@
 
   .resultDiv
     background-color: #ffffff
-    max-height: 300px
     overflow: auto
     z-index: 200
     position: absolute
     left: 12px
     right: 12px
     top: 75px
+    bottom: 0
+    transition: all 0.25s
     .resultDivTitle
       line-height: 50px
       font-size: 14px
@@ -330,15 +334,13 @@
       text-align: left
       margin-left: 10px
     .resultDivNoMore
-      border-top: 1px solid #CCCCCC
+      border-top: 1px solid #f5f5f5
       line-height: 50px
       font-size: 14px
       color: #909090
       text-align: center
-
-
-  .hide
-    display: none
+  .resultDivHide
+    transform: translateY(-2000px);
 
   .bottomResultDiv
     position: absolute
@@ -346,9 +348,10 @@
     right: 0
     bottom: 0
     background-color: #ffffff
-    z-index: 10000
+    z-index: 199
     display: flex
     align-items: center
+    transition: all 0.25s
     .bottomResult
       flex: 1
       padding: 10px 15px
@@ -369,5 +372,9 @@
       line-height: 25px
       padding: 0 15px
       border-left: 1px solid #cccccc
+
+  .bottomResultDivHide
+    transform: translateY(500px);
+
 
 </style>
